@@ -9,8 +9,17 @@ import { AuthContext } from '../context/AuthContext'
 const App = () => {
   const { authUser } = useContext(AuthContext)
   return (
-    <div className="bg-gradient-to-r from-blue-200 to-orange-200 bg-cover w-full h-screen">
-      <Toaster/>
+    <div className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 bg-cover w-full h-screen">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1e1b4b',
+            color: '#fff',
+            border: '1px solid rgba(139, 92, 246, 0.3)',
+          },
+        }}
+      />
       <Routes>
         <Route path='/' element={authUser ? <HomePage /> : <Navigate to="/login" />}/>
         <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to="/" />}/>

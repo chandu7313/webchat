@@ -23,7 +23,9 @@ export const ChatProvider = ({ children })=>{
                 setUnseenMessages(data.unseenMessages)
             }
         } catch (error) {
-            toast.error(error.message)
+            const errorMsg = error?.response?.data?.message || error?.message || "An error occurred";
+            toast.error(errorMsg);
+            console.error("Get users error:", error);
         }
     }
 
@@ -35,7 +37,9 @@ export const ChatProvider = ({ children })=>{
                 setMessages(data.messages)
             }
         } catch (error) {
-            toast.error(error.message)
+            const errorMsg = error?.response?.data?.message || error?.message || "An error occurred";
+            toast.error(errorMsg);
+            console.error("Get messages error:", error);
         }
     }
 
@@ -49,7 +53,9 @@ export const ChatProvider = ({ children })=>{
                 toast.error(data.message);
             }
         } catch (error) {
-            toast.error(error.message);
+            const errorMsg = error?.response?.data?.message || error?.message || "An error occurred";
+            toast.error(errorMsg);
+            console.error("Send message error:", error);
         }
     }
 

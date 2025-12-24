@@ -24,30 +24,39 @@ const Sidebar = () => {
     },[onlineUsers])
 
   return (
-    <div className={`bg-[#8185B2]/10 h-full p-5 rounded-r-xl overflow-y-scroll text-white ${selectedUser ? "max-md:hidden" : ''}`}>
-      <div className='pb-5'>
-        <div className='bg-white rounded-full flex items-center gap-2 py-3 px-4 mt-5 shadow-md'>
-            {/* <img src={assets.search_icon} alt="Search" className='w-3 bg-black'/> */}
-            <IoSearch color='gray'/>
-            <input onChange={(e)=>setInput(e.target.value)} type="text" className='bg-transparent border-none outline-none text-gray-600 text-sm placeholder-[#c8c8c8] flex-1' placeholder='Search User...'/>
+    <div className={`bg-gray-50/80 backdrop-blur-sm h-full p-4 overflow-y-scroll border-r border-gray-200 ${selectedUser ? "max-md:hidden" : ''}`}>
+      <div className='pb-4'>
+        <div className='bg-white border border-gray-300 rounded-xl flex items-center gap-3 py-3 px-4 shadow-md focus-within:border-purple-500 focus-within:ring-2 focus-within:ring-purple-500/20 transition-all'>
+            <IoSearch className='text-gray-400' size={20}/>
+            <input onChange={(e)=>setInput(e.target.value)} type="text" className='bg-transparent border-none outline-none text-gray-700 text-sm placeholder-gray-400 flex-1' placeholder='Search User...'/>
         </div>
-
       </div>
 
-    <div className='flex flex-col gap-2'>
+    <div className='flex flex-col gap-2 mt-2'>
         {filteredUsers.map((user, index)=>(
             <div onClick={()=> {setSelectedUser(user); setUnseenMessages(prev=> ({...prev, [user._id]:0}))}}
-             key={index} className={`text-black relative flex items-center gap-3 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${selectedUser?._id === user._id && 'bg-linear-to-r from-[#03b6fc]/20 to-transparent'}`}>
-                <img src={user?.profilePic || assets.avatar_icon} alt="" className='w-[35px] aspect-[1/1] rounded-full'/>
-                <div className='flex flex-col leading-5'>
-                    <p>{user.fullName}</p>
-                    {
-                        onlineUsers.includes(user._id)
-                        ? <span className='text-green-400 text-xs'>Online</span>
-                        : <span className='text-neutral-400 text-xs'>Offline</span>
-                    }
+             key={index} className={`relative flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 ${
+                selectedUser?._id === user._id 
+                    ? 'bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-300 shadow-md' 
+                    : 'hover:bg-white border border-transparent'
+             }`}>
+                <div className='relative'>
+                    <img src={user?.profilePic || assets.avatar_icon} alt="" className='w-12 h-12 rounded-full border-2 border-gray-300 object-cover'/>
+                    {onlineUsers.includes(user._id) && (
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></span>
+                    )}
                 </div>
-                {unseenMessages[user._id] > 0 && <p className='absolute top-4 right-4 text-xs h-5 w-5 flex justify-center items-center rounded-full bg-violet-500/50'>{unseenMessages[user._id]}</p>}
+                <div className='flex flex-col flex-1 min-w-0'>
+                    <p className='text-gray-900 font-medium text-sm truncate'>{user.fullName}</p>
+                    <span className={`text-xs ${onlineUsers.includes(user._id) ? 'text-green-600' : 'text-gray-500'}`}>
+                        {onlineUsers.includes(user._id) ? 'Online' : 'Offline'}
+                    </span>
+                </div>
+                {unseenMessages[user._id] > 0 && (
+                    <span className='absolute top-2 right-2 text-xs h-6 w-6 flex justify-center items-center rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold shadow-lg'>
+                        {unseenMessages[user._id]}
+                    </span>
+                )}
             </div>
         ) )}
     </div>

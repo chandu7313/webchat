@@ -4,8 +4,14 @@ import toast from "react-hot-toast";
 import { io } from "socket.io-client"
 
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+const socketUrl = import.meta.env.VITE_SOCKET_URL || backendUrl;
 axios.defaults.baseURL = backendUrl;
+
+// Log for debugging
+if (!import.meta.env.VITE_BACKEND_URL) {
+    console.warn("VITE_BACKEND_URL not set, using default: http://localhost:5001");
+}
 
 export const AuthContext = createContext();
 
@@ -25,7 +31,8 @@ export const AuthProvider = ({ children })=>{
                 connectSocket(data.user)
             }
         } catch (error) {
-            toast.error(error.message)
+            // If not authenticated yet (401/403), just ignore silently
+            console.warn("Auth check failed:", error?.response?.status || error.message);
         }
     }
 
@@ -42,10 +49,17 @@ const login = async (state, credentials)=>{
             localStorage.setItem("token", data.token)
             toast.success(data.message)
         }else{
-            toast.error(data.message)
+            toast.error(data.message || "Operation failed")
         }
     } catch (error) {
-        toast.error(error.message)
+        if (error.code === 'ERR_NETWORK' || error.message?.includes('CONNECTION_REFUSED')) {
+            toast.error("Cannot connect to server. Make sure the backend is running on http://localhost:5001");
+            console.error("Connection error - Backend URL:", backendUrl);
+        } else {
+            const errorMsg = error?.response?.data?.message || error?.response?.statusText || error?.message || "An error occurred";
+            toast.error(errorMsg);
+        }
+        console.error("Login error:", error.response?.data || error);
     }
 }
 
@@ -58,7 +72,9 @@ const login = async (state, credentials)=>{
         setOnlineUsers([]);
         axios.defaults.headers.common["token"] = null;
         toast.success("Logged out successfully")
-        socket.disconnect();
+        if(socket){
+            socket.disconnect();
+        }
     }
 
     // Update profile function to handle user profile updates
@@ -78,7 +94,7 @@ const login = async (state, credentials)=>{
     // Connect socket function to handle socket connection and online users updates
     const connectSocket = (userData)=>{
         if(!userData || socket?.connected) return;
-        const newSocket = io(backendUrl, {
+        const newSocket = io(socketUrl, {
             query: {
                 userId: userData._id,
             }
@@ -94,9 +110,9 @@ const login = async (state, credentials)=>{
     useEffect(()=>{
         if(token){
             axios.defaults.headers.common["token"] = token;
+            checkAuth();
         }
-        checkAuth();
-    },[])
+    },[token])
 
     const value = {
         axios,
